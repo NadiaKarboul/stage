@@ -226,7 +226,43 @@ public function ajoutpartici(int $user_id, int $formation_id, UserRepository $us
        return $this->redirectToRoute('afficheprod',); 
    }  
    
-   
+   //modifier produit
+#[Route('/modifprod/{id}', name: 'modifprod')]
+public function modifprod(ManagerRegistry $doctrine,Request $request,$id,ProduitRepository $r)
+                       {
+      { //récupérer le produit a modifier
+        $Produit=$r->find($id);
+    $form=$this->createForm(ProduitFormType::class,$Produit);
+     $form->handleRequest($request);
+     if($form->isSubmitted() ){
+    $em =$doctrine->getManager() ;
+    $imageFile = $form->get('image')->getData();
+       
+    if ($imageFile) {
+        $imagesDirectory = 'C:/xampp/htdocs/images';
+        $originalFilename = $imageFile->getClientOriginalName();
+        $filenameWithoutSpaces = str_replace(' ', '_', $originalFilename);
+
+        try {
+            
+            $imageFile->move($imagesDirectory,$filenameWithoutSpaces);
+            
+        } catch (FileException $e) {
+            // Handle exception
+        }
+        $Produit->setImage($filenameWithoutSpaces);
+    }
+    
+
+ 
+    $em->persist($Produit);
+    $em->flush();
+    return $this->redirectToRoute('afficheprod');}
+
+   return $this->renderForm("addproduit.html.twig",
+    array("f"=>$form));
+}}
+
 
 }
 
